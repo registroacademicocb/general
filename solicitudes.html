@@ -173,23 +173,25 @@
 
   /* ---------- Charts (ANS) ---------- */
   .charts-row{
-    display:flex; flex-wrap:wrap; justify-content:flex-start; gap:12px; margin-bottom:18px; align-items:flex-start;
+    display:flex; flex-wrap:wrap; justify-content:flex-start; align-items:stretch; gap:14px; margin-bottom:18px;
   }
   .chart-card{
-    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px 14px; box-shadow:var(--shadow);
-    flex:0 1 250px; min-width:210px; max-width:280px;
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:13px 16px; box-shadow:var(--shadow);
+    flex:1 1 260px; min-width:230px; max-width:400px;
+    display:flex; flex-direction:column;
   }
-  .chart-card.wide{ flex:1 1 360px; max-width:640px; }
-  .chart-card.ans-card{ flex:0 1 400px; min-width:320px; max-width:440px; }
+  .chart-card.wide{ flex:1 1 100%; max-width:100%; }
+  .chart-card.ans-card{ flex:1 1 calc(50% - 7px); max-width:calc(50% - 7px); min-width:260px; }
+  .chart-fill{ flex:1; display:flex; align-items:center; }
   .chart-card h3{
     font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 3px; font-weight:700;
   }
   .chart-card .chart-sub{font-size:10.5px; color:var(--muted); margin:0 0 10px; line-height:1.4;}
-  .donut-wrap{display:flex; align-items:center; gap:22px;}
-  .donut-legend{display:flex; flex-direction:column; gap:9px; font-size:12px; flex:1;}
+  .donut-wrap{display:flex; align-items:center; gap:20px; width:100%;}
+  .donut-legend{display:flex; flex-direction:column; gap:9px; font-size:12px; flex:1; min-width:0;}
   .donut-legend .row{display:flex; align-items:center; gap:8px; white-space:nowrap;}
   .donut-legend .row b{margin-left:auto; font-variant-numeric:tabular-nums; padding-left:10px;}
-  .hbar-row{display:grid; grid-template-columns:70px 1fr 32px; align-items:center; gap:6px; margin-bottom:6px; font-size:10.5px;}
+  .hbar-row{display:grid; grid-template-columns:118px 1fr 30px; align-items:center; gap:7px; margin-bottom:7px; font-size:10.5px;}
   .hbar-row .lbl{color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .ans-row{display:grid; grid-template-columns:1fr 42px; align-items:center; gap:6px; margin-bottom:8px;}
   .ans-row .lbl{font-size:10.5px; display:flex; justify-content:space-between; gap:6px; margin-bottom:3px;}
@@ -320,7 +322,12 @@
           <div class="chart-card ans-card">
             <h3>Cumplimiento global de ANS</h3>
             <p class="chart-sub">% dentro, fuera y en gestión del Acuerdo de Nivel de Servicio</p>
-            <div id="ansDonut"></div>
+            <div id="ansDonut" class="chart-fill"></div>
+          </div>
+          <div class="chart-card ans-card">
+            <h3>Solicitudes por tipo</h3>
+            <p class="chart-sub">Volumen por tipo</p>
+            <div id="tipoChart"></div>
           </div>
           <div class="chart-card wide">
             <div class="trend-head">
@@ -685,6 +692,58 @@ const EMBEDDED_DATA = [["CU SOACHA","977111","YOPASA BALBUENA","LAURA LILIANA","
       </div>`;
   }
 
+  const TIPO_SHORT = {
+    "Reingreso (retiro voluntario o falta disciplinaria)": "Reingreso",
+    "Acompañamiento para el mejoramiento del desempeño académico": "Acompañamiento",
+    "Homologación": "Homologación",
+    "Cuarto de matrícula": "Cuarto de matrícula",
+    "Media matrícula": "Media matrícula",
+    "Matrícula en más de un programa": "Matrícula en 2 programas",
+    "Modificación de Calificación (Definitiva)": "Modificación calificación",
+    "Reconocimiento Aprendizaje Previos RAP": "RAP",
+    "Transferencia interna": "Transferencia interna",
+    "Cambio de sede": "Cambio de sede",
+    "Cancelación de periodo": "Cancelación periodo",
+    "Cancelación de cursos": "Cancelación cursos",
+    "Revisión de pruebas y calificaciones (segunda revisión)": "Revisión calificaciones",
+    "Créditos adicionales": "Créditos adicionales",
+    "Recurso de Apelación negación Reingreso": "Apelación reingreso",
+    "Prorroga opción de grado": "Prórroga opción de grado",
+    "Modalidad opción de grado": "Modalidad opción de grado"
+  };
+  function shortTipoLabel(t){ return TIPO_SHORT[t] || t; }
+
+  const TIPO_PALETTE = ['--brand-accent','--navy-2','--teal','--plum','--focus','--amber','--green','--brand-yellow','--red'];
+
+  function renderTipoChart(all){
+    const wrap = document.getElementById('tipoChart');
+    const filtered = all.filter(({r}) => !/certificad|certificaci/i.test(r.tipoSolicitud));
+    if(!filtered.length){ wrap.innerHTML = '<div class="chart-empty">Sin datos para los filtros actuales.</div>'; return; }
+    const byTipo = {};
+    filtered.forEach(({r})=>{
+      const key = r.tipoSolicitud || 'Sin tipo';
+      byTipo[key] = (byTipo[key]||0) + 1;
+    });
+    let items = Object.keys(byTipo).map(k=>({label:k, total:byTipo[k]}));
+    items.sort((a,b)=>b.total-a.total);
+    const TOP_N = 10;
+    let shown = items.slice(0, TOP_N);
+    if(items.length > TOP_N){
+      const restTotal = items.slice(TOP_N).reduce((s,i)=>s+i.total, 0);
+      if(restTotal) shown.push({label:`Otros tipos (${items.length-TOP_N})`, total:restTotal, isOther:true});
+    }
+    shown.forEach((it,i)=>{ it.colorVar = it.isOther ? '--slate' : TIPO_PALETTE[i % TIPO_PALETTE.length]; });
+    const max = Math.max(...shown.map(i=>i.total), 1);
+    wrap.innerHTML = shown.map(it=>{
+      const widthPct = (it.total/max*100);
+      return `<div class="hbar-row">
+        <div class="lbl" title="${escapeHtml(it.label)}">${escapeHtml(shortTipoLabel(it.label))}</div>
+        <div class="hbar-track" style="width:${widthPct}%;"><div class="seg" style="width:100%; background:${cssVar(it.colorVar)};"></div></div>
+        <div class="val">${it.total.toLocaleString('es-CO')}</div>
+      </div>`;
+    }).join('');
+  }
+
   /* ---- Tendencia de cumplimiento (línea por semana o mes) ---- */
   let trendGranularity = 'month';
 
@@ -889,6 +948,7 @@ const EMBEDDED_DATA = [["CU SOACHA","977111","YOPASA BALBUENA","LAURA LILIANA","
     renderKpis(all);
     renderSemaforoToggle(all);
     renderAnsDonut(all);
+    renderTipoChart(all);
     renderTendenciaChart(all);
     document.getElementById('resultCount').innerHTML = `<b>${all.length.toLocaleString('es-CO')}</b> de ${RAW.length.toLocaleString('es-CO')} solicitudes`;
 
