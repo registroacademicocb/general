@@ -499,7 +499,8 @@ const EMBEDDED_DATA = [["CU GIRARDOT","351151","CASTILLO OBANDO","ANGIE PAOLA","
       fechaRespuesta: parseIso(rec[10])
     }));
 
-    const gen = new Date(GENERATED_AT);
+    const genParts = GENERATED_AT.split('-').map(Number);
+    const gen = genParts.length===3 ? new Date(genParts[0], genParts[1]-1, genParts[2]) : new Date(NaN);
     document.getElementById('dataDate').textContent = isNaN(gen) ? GENERATED_AT :
       gen.toLocaleDateString('es-CO', {day:'numeric', month:'long', year:'numeric'});
 
