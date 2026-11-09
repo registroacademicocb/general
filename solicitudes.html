@@ -575,7 +575,9 @@ const EMBEDDED_DATA = [["CU ZIPAQUIRÁ","1037204","OLAYA CONTRERAS","YUDY NATHAL
   /* ================= Semáforo ================= */
   function computeRow(r){
     const sla = SLA_MAP[r.tipoSolicitud] !== undefined ? SLA_MAP[r.tipoSolicitud] : SLA_FALLBACK_DIAS;
-    const isTerminal = TERMINAL_STATES.includes(r.estado);
+    // Excepción: en Certificación de contenidos programáticos, el estado AC se considera abierto.
+    const acAbierto = r.estado==='AC' && /contenidos program/i.test(r.tipoSolicitud);
+    const isTerminal = TERMINAL_STATES.includes(r.estado) && !acAbierto;
     const today = new Date();
 
     let semaforo, diasTranscurridos, label, sublabel, ratio = null;
