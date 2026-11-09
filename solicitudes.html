@@ -344,7 +344,7 @@
             <input type="text" id="searchInput" placeholder="Estudiante, ID, programa...">
           </div>
 
-          <h3>Estado de la solicitud</h3>
+          <h3>Estado del plazo</h3>
           <div class="semaforo-toggle" id="semaforoToggle"></div>
           <button class="clear-link" id="clearFilters">Limpiar todos los filtros</button>
         </div>
@@ -354,9 +354,13 @@
             <span class="lbl-txt">Centro Universitario</span>
             <select id="filterSede"><option value="">Todos los centros universitarios</option></select>
           </label>
-          <label class="field" style="margin-bottom:0;">
+          <label class="field">
             <span class="lbl-txt">Tipo de solicitud</span>
             <select id="filterTipo"><option value="">Todos los tipos</option></select>
+          </label>
+          <label class="field" style="margin-bottom:0;">
+            <span class="lbl-txt">Estado de la solicitud</span>
+            <select id="filterEstado"><option value="">Todos los estados</option></select>
           </label>
         </div>
       </aside>
@@ -479,6 +483,12 @@ const EMBEDDED_DATA = [["CU ZIPAQUIRÁ","1037204","OLAYA CONTRERAS","YUDY NATHAL
   };
   const SLA_FALLBACK_DIAS = 5;
   const TIPOS_AUTOMATICOS = ["Créditos adicionales","Media matrícula","Cancelación de cursos"];
+  const ESTADO_NOMBRE = {
+    TR:'En trámite', PC:'Pendiente de aprobación', AP:'Aprobada', AC:'Aprobada requiere pago', RE:'Rechazada',
+    AN:'Anulada', PR:'Pendiente de registro', RS:'Registrada en el sistema', PF:'Pendiente de firma',
+    PN:'Pendiente de corrección', RB:'Recibida', AR:'Aprobado parcial', EA:'Examen no aprobado'
+  };
+  const ESTADO_ORDEN = ['TR','PC','AP','AC','AR','RB','PF','PN','PR','RS','EA','RE','AN'];
   const TERMINAL_STATES = ["RS","RE","AN","EN","CO","AC"];
   const AMBER_THRESHOLD = 70;
 
@@ -616,6 +626,13 @@ const EMBEDDED_DATA = [["CU ZIPAQUIRÁ","1037204","OLAYA CONTRERAS","YUDY NATHAL
     const tipos = Array.from(new Set(RAW.map(r=>r.tipoSolicitud).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'es'));
     fillSelect('filterSede', sedes, 'Todos los centros universitarios');
     fillSelect('filterTipo', tipos, 'Todos los tipos');
+    const presentes = Array.from(new Set(RAW.map(r=>r.estado).filter(Boolean)));
+    presentes.sort((a,b)=>{
+      const ia = ESTADO_ORDEN.indexOf(a), ib = ESTADO_ORDEN.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib) || a.localeCompare(b);
+    });
+    document.getElementById('filterEstado').innerHTML = '<option value="">Todos los estados</option>' +
+      presentes.map(e=>`<option value="${escapeHtml(e)}">${escapeHtml(e)}${ESTADO_NOMBRE[e] ? ' · '+escapeHtml(ESTADO_NOMBRE[e]) : ''}</option>`).join('');
   }
   function fillSelect(id, values, placeholder){
     const sel = document.getElementById(id);
@@ -626,11 +643,13 @@ const EMBEDDED_DATA = [["CU ZIPAQUIRÁ","1037204","OLAYA CONTRERAS","YUDY NATHAL
     const q = norm(document.getElementById('searchInput').value).toLowerCase();
     const sedeF = document.getElementById('filterSede').value;
     const tipoF = document.getElementById('filterTipo').value;
+    const estadoF = document.getElementById('filterEstado').value;
 
     const out = [];
     for(const r of RAW){
       if(sedeF && r.sede !== sedeF) continue;
       if(tipoF && r.tipoSolicitud !== tipoF) continue;
+      if(estadoF && r.estado !== estadoF) continue;
       if(q){
         const hay = `${r.nombres} ${r.apellidos} ${r.idEstudiante} ${r.programa} ${r.nombrePrograma}`.toLowerCase();
         if(!hay.includes(q)) continue;
@@ -1013,10 +1032,12 @@ const EMBEDDED_DATA = [["CU ZIPAQUIRÁ","1037204","OLAYA CONTRERAS","YUDY NATHAL
   document.getElementById('searchInput').addEventListener('input', ()=>{ page=1; render(); });
   document.getElementById('filterSede').addEventListener('change', ()=>{ page=1; render(); });
   document.getElementById('filterTipo').addEventListener('change', ()=>{ page=1; render(); });
+  document.getElementById('filterEstado').addEventListener('change', ()=>{ page=1; render(); });
   document.getElementById('clearFilters').addEventListener('click', ()=>{
     document.getElementById('searchInput').value='';
     document.getElementById('filterSede').value='';
     document.getElementById('filterTipo').value='';
+    document.getElementById('filterEstado').value='';
     semaforoFilter = null; page=1;
     render();
   });
