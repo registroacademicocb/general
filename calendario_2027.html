@@ -1,6 +1,9 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Calendario Académico 2027</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
@@ -329,6 +332,9 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 }
 @media (prefers-reduced-motion:reduce){.roleCard,.perCard{transition:none}}
 </style>
+<style>body{margin:0}</style>
+</head>
+<body>
 
 <!-- ===== Pantalla 1: Ingreso ===== -->
 <section class="screen stage gut" id="scrRole">
@@ -428,6 +434,8 @@ const ACT = {
   pa2:{n:"Segundo momento (8 semanas)",c:"periodo",w:"8",e:"Segundo bloque de 8 semanas para los cursos por momentos.",p:"Segundo bloque de 8 semanas para los cursos que se dictan por momentos."},
   web:{n:"Apertura web estudiantes nuevos",c:"admision",e:"Ventana para que aspirantes y estudiantes nuevos se inscriban por la web. Si conoces a alguien que quiere ingresar, este es su plazo."},
   pp:{n:"Descuento pronto pago",c:"admision",e:"Paga tu matrícula dentro de estas fechas para acceder al descuento por pronto pago."},
+  pp1:{n:"Descuento Pronto Pago 1 (5%)",c:"admision",e:"Paga tu matrícula dentro de estas fechas para acceder al descuento del 5% por pronto pago."},
+  pp2:{n:"Descuento Pronto Pago 2 (2,5%)",c:"admision",e:"Si no alcanzaste el primer plazo, paga en estas fechas para acceder al descuento del 2,5% por pronto pago."},
   mo:{n:"Matrícula ordinaria",c:"admision",e:"Plazo regular para pagar y formalizar tu matrícula."},
   mx:{n:"Matrícula extraordinaria",c:"admision",e:"Si no pagaste en el plazo ordinario, aquí puedes hacerlo con el valor de matrícula extraordinaria."},
   mt:{n:"Matrícula extemporánea",c:"admision",e:"Último plazo para matricularte, ya con las clases iniciadas. Mejor no dejarlo para este momento."},
@@ -460,7 +468,7 @@ const ACT = {
 const PER = [
  {id:"s1",code:"S1",grp:"S",tipo:"Semestre",name:"Primer semestre 2027",rx:"Semana Santa",ev:{
   pa:["09/02/2027","05/06/2027"],pa1:["09/02/2027","10/04/2027"],pa2:["12/04/2027","05/06/2027"],
-  web:["29/09/2026","20/02/2027"],pp:["23/11/2026","30/12/2026"],mo:["31/12/2026","20/01/2027"],mx:["21/01/2027","08/02/2027"],mt:["09/02/2027","17/02/2027"],
+  web:["29/09/2026","20/02/2027"],pp1:["23/11/2026","21/12/2026"],pp2:["22/12/2026","05/01/2027"],mo:["06/01/2027","20/01/2027"],mx:["21/01/2027","08/02/2027"],mt:["09/02/2027","17/02/2027"],
   sol:["12/10/2026","06/02/2027"],rap:["12/10/2026","27/03/2027"],inA:["17/11/2026","19/12/2026"],ins:["06/01/2027","20/02/2027"],
   can16:["08/02/2027","03/04/2027"],can8a:["08/02/2027","27/02/2027"],can8b:["08/04/2027","30/04/2027"],canP:["01/02/2027","22/05/2027"],
   n16a:["14/03/2027","21/03/2027"],n16b:["02/05/2027","09/05/2027"],n16c:["30/05/2027","05/06/2027"],
@@ -486,7 +494,7 @@ const PER = [
    n16b:"Se cruza con el primer registro de 16 semanas (18/09–24/09). Conviene confirmar estas fechas."}},
  {id:"q1",code:"Q1",grp:"Q",tipo:"Cuatrimestre",name:"Primer cuatrimestre 2027",rx:"Semana Santa",ev:{
   pa:["12/01/2027","08/05/2027"],pa1:["12/01/2027","06/03/2027"],pa2:["08/03/2027","08/05/2027"],
-  web:["29/09/2026","09/01/2027"],pp:["23/11/2026","03/12/2026"],mo:["04/12/2026","12/01/2027"],mx:["13/01/2027","18/01/2027"],mt:["19/01/2027","09/02/2027"],
+  web:["29/09/2026","09/01/2027"],pp1:["23/11/2026","13/12/2026"],pp2:["14/12/2026","28/12/2026"],mo:["29/12/2026","12/01/2027"],mx:["13/01/2027","18/01/2027"],mt:["19/01/2027","09/02/2027"],
   sol:["02/11/2026","31/01/2027"],rap:["02/10/2026","31/01/2027"],ins:["14/12/2026","09/01/2027"],
   can16:["12/01/2027","07/03/2027"],can8a:["12/01/2027","07/02/2027"],can8b:["08/03/2027","04/04/2027"],canP:["12/01/2027","25/04/2027"],
   plan:["14/12/2026","29/01/2027"],
@@ -877,4 +885,5 @@ setInterval(()=>{ const t=todayN(); if(t!==S.ref){ S.ref=t; S.month=null; render
 })();
 </script>
 
-</body></html>
+</body>
+</html>
